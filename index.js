@@ -11,7 +11,6 @@ const app = express();
 
 app.use(express.json())
 app.use(cors())
-app.use('/api/web-data', require('./routes/web-data.routes'))
 
 bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
@@ -51,5 +50,25 @@ bot.on('message', async (msg) => {
     }
 });
 
+app.post(
+    '/web-data', async(req, res) => {
+        try {
+            const { queryId, products, totalPrices } = req.body
+            console.log(queryId, 'queryId')
+            bot.on('message', async (msg) => {
+                const chatId = msg.chat.id;
+                console.log(msg.chat)
+                if (totalPrices > 0) {
+                    await bot.sendMessage(chatId, 'Поздравляю, Вы купили товара на сумму ' + totalPrices )
+                }
+            })
+            return res.status(200).json({message: 'Successfully'})
+        } catch (error) {
+            return res.status(500).json({message: 'Error!'})
+        }
+    }
+)
+
 const PORT = config.get('port')
+
 app.listen(PORT, () => console.log(`Server started on Port ` + PORT))
