@@ -50,24 +50,22 @@ bot.on('message', async (msg) => {
     }
 });
 
-app.post(
-    '/web-data', async(req, res) => {
-        try {
-            const { queryId, products, totalPrices } = req.body
-            console.log(queryId, 'queryId')
-            bot.on('message', async (msg) => {
-                const chatId = msg.chat.id;
-                console.log(msg.chat)
-                if (totalPrices > 0) {
-                    await bot.sendMessage(chatId, 'Поздравляю, Вы купили товара на сумму ' + totalPrices )
-                }
-            })
-            return res.status(200).json({message: 'Successfully'})
-        } catch (error) {
-            return res.status(500).json({message: 'Error!'})
-        }
+app.post('/web-data', async(req, res) => {
+    const {queryId, products = [], totalPrice} = req.body;
+    try {
+        await bot.answerWebAppQuery(queryId, {
+            type: 'article',
+            id: queryId,
+            title: 'Успешная покупка',
+            input_message_content: {
+                message_text: `Поздравляю с покупкой, вы приобрели товар на сумму ${totalPrice}, ${products.map(item => item.title).join(', ')}`
+            }
+        })
+        return res.status(200).json({message: 'Successfully'})
+    } catch (error) {
+        return res.status(500).json({message: 'Error!'})
     }
-)
+})
 
 const PORT = config.get('port')
 
